@@ -1,0 +1,32 @@
+=== python 环境 ===
+Python 3.10.22
+/opt/hostedtoolcache/Python/3.10.22/x64/bin/python3
+pip 26.2.2 from /opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages/pip (python 3.10)
+=== 升级 pip ===
+Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.10.22/x64/lib/python3.10/site-packages (26.2.2)
+=== 装 buildozer 1.6.0 ===
+Collecting buildozer==1.6.0
+  Downloading buildozer-1.6.0-py3-none-any.whl.metadata (159 kB)
+Collecting cython==0.29.33
+  Downloading Cython-0.29.33-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl.metadata (3.1 kB)
+Collecting pexpect (from buildozer==1.6.0)
+  Downloading pexpect-4.9.0-py2.py3-none-any.whl.metadata (2.5 kB)
+Collecting packaging (from buildozer==1.6.0)
+  Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+Collecting ptyprocess>=0.5 (from pexpect->buildozer==1.6.0)
+  Downloading ptyprocess-0.7.0-py2.py3-none-any.whl.metadata (1.3 kB)
+Downloading buildozer-1.6.0-py3-none-any.whl (92 kB)
+Downloading Cython-0.29.33-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl (1.9 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 93.7 MB/s  0:00:00
+Downloading packaging-26.3-py3-none-any.whl (129 kB)
+Downloading pexpect-4.9.0-py2.py3-none-any.whl (63 kB)
+Downloading ptyprocess-0.7.0-py2.py3-none-any.whl (13 kB)
+Installing collected packages: ptyprocess, pexpect, packaging, cython, buildozer
+
+Successfully installed buildozer-1.6.0 cython-0.29.33 packaging-26.3 pexpect-4.9.0 ptyprocess-0.7.0
+=== CLI 自检 ===
+Buildozer 1.6.0
+=== 已装列表 ===
+buildozer  1.6.0
+Cython     0.29.33
+pexpect    4.9.0
