@@ -6,18 +6,36 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
   android:
-    runs-on: ubuntu-latest
+    # 钉死 22.04：buildozer / python-for-android 在这套环境上验证最充分。
+    # ubuntu-latest 已切到 26.04，libtinfo5 等包被移除，且自带 Python 3.13
+    # 会让 cython==0.29.33 编译失败。
+    runs-on: ubuntu-22.04
+
     steps:
       - name: 拉代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: 装 Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
       - name: 装 JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
+
+      - name: 看一眼环境（出问题好定位）
+        run: |
+          echo "系统：$(lsb_release -d | cut -f2)"
+          echo "Python：$(python3 --version)"
+          echo "Java：$(java -version 2>&1 | head -1)"
 
       - name: 装系统依赖
         run: |
@@ -32,6 +50,7 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install buildozer cython==0.29.33
+          buildozer --version
 
       - name: 缓存 SDK / NDK（首次构建后能省很多时间）
         uses: actions/cache@v4
@@ -46,9 +65,25 @@ jobs:
       - name: 构建 APK
         run: buildozer -v android debug
 
-      - name: 上传 APK
+      - name: 上传 APK（构建产物）
         uses: actions/upload-artifact@v4
         with:
           name: kanjianyue-debug
           path: bin/*.apk
           if-no-files-found: error
+
+      # 发布到 Release：手机端能直接点 .apk 单文件下载，不用再下 zip 解压
+      - name: 发布到 Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body: |
+            看见余额 ${{ github.ref_name }}
+
+            自动构建产物（debug 包，可直接安装）。
+
+            注意：当前罐子与配色为实验版本，UI 待重做。
+          files: bin/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
