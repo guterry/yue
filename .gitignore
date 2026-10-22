@@ -1,0 +1,28 @@
+# 本地虚拟环境与构建产物，不进仓库
+.venv/
+__pycache__/
+*.pyc
+.buildozer/
+bin/
+.gradle/
+
+# 调试用的截图、日志、临时脚本
+*.log
+_*.py
+# 上面那条会误伤包初始化文件，必须放回来（注意：gitignore 的注释只能独占一行）
+!__init__.py
+_*.txt
+_*.png
+dbg*.png
+dbg*.log
+shot_*.png
+preview*.png
+0001.shot_jar
+
+# 本地工作记忆，不对外
+.workbuddy/
+
+# 数据
+*.db
+*.db-wal
+*.db-shm
