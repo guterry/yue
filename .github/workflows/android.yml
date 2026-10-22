@@ -48,9 +48,18 @@ jobs:
 
       - name: 装 buildozer
         run: |
+          python3 -V
           python3 -m pip install --upgrade pip
-          python3 -m pip install buildozer cython==0.29.33
-          buildozer --version
+          # 钉死大版本：1.6.0 是 2026 年的新版，SDK 下载地址更新过。
+          # 但它的 CLI 自检（--version）曾在新环境上失败，所以下面带自动回退。
+          python3 -m pip install --no-cache-dir buildozer==1.6.0 cython==0.29.33
+          if buildozer --version || buildozer help >/dev/null 2>&1; then
+            echo "buildozer CLI 自检通过"
+          else
+            echo "1.6.0 的 CLI 自检没通过，回退到 1.5.0"
+            python3 -m pip install --no-cache-dir buildozer==1.5.0
+            buildozer --version
+          fi
 
       - name: 缓存 SDK / NDK（首次构建后能省很多时间）
         uses: actions/cache@v4
@@ -64,6 +73,17 @@ jobs:
 
       - name: 构建 APK
         run: buildozer -v android debug
+
+      # 构建一旦失败，把 buildozer 的现场日志留下来，否则只能靠猜
+      - name: 失败时保留构建日志
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: buildozer-diag
+          path: |
+            .buildozer/*.log
+            .buildozer/android/platform/build-*/*.log
+          if-no-files-found: ignore
 
       - name: 上传 APK（构建产物）
         uses: actions/upload-artifact@v4

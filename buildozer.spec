@@ -43,7 +43,8 @@ android.accept_sdk_license = True
 
 # 不启用 AndroidX 之外的多余服务
 android.enable_androidx = True
-p4a.branch = master
+# 不钉 p4a 分支：让 buildozer 用自己默认匹配的那份 python-for-android。
+# 强行拉 master 可能和 buildozer 版本对不上，CI 上表现为莫名其妙的构建失败。
 
 [buildozer]
 log_level = 2
