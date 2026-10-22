@@ -48,17 +48,28 @@ jobs:
 
       - name: 装 buildozer
         run: |
-          python3 -V
-          python3 -m pip install --upgrade pip
-          # 钉死大版本：1.6.0 是 2026 年的新版，SDK 下载地址更新过。
-          # 但它的 CLI 自检（--version）曾在新环境上失败，所以下面带自动回退。
-          python3 -m pip install --no-cache-dir buildozer==1.6.0 cython==0.29.33
-          if buildozer --version || buildozer help >/dev/null 2>&1; then
-            echo "buildozer CLI 自检通过"
-          else
-            echo "1.6.0 的 CLI 自检没通过，回退到 1.5.0"
-            python3 -m pip install --no-cache-dir buildozer==1.5.0
-            buildozer --version
+          mkdir -p /tmp/diag
+          {
+            echo "=== python 环境 ==="
+            python3 -V
+            command -v python3
+            python3 -m pip --version || echo "[警告] python3 -m pip 不可用"
+            echo "=== 升级 pip ==="
+            python3 -m pip install --upgrade pip
+            echo "=== 装 buildozer 1.6.0 ==="
+            python3 -m pip install --no-cache-dir buildozer==1.6.0 cython==0.29.33 \
+              || echo "[警告] 1.6.0 安装失败"
+            echo "=== CLI 自检 ==="
+            buildozer --version || echo "[警告] --version 没通过"
+            echo "=== 已装列表 ==="
+            python3 -m pip list 2>/dev/null | grep -iE 'buildozer|cython|pexpect|virtualenv'
+          } > /tmp/diag/bz.txt 2>&1
+          cat /tmp/diag/bz.txt
+          # 1.6.0 的 CLI 自检不过就直接回退 1.5.0（Kivy 社区用得最广的那版）
+          if ! buildozer --version >/dev/null 2>&1; then
+            echo ">>> 1.6.0 自检不过，回退 1.5.0" | tee -a /tmp/diag/bz.txt
+            python3 -m pip install --no-cache-dir buildozer==1.5.0 cython==0.29.33 2>&1 | tee -a /tmp/diag/bz.txt
+            buildozer --version 2>&1 | tee -a /tmp/diag/bz.txt || exit 1
           fi
 
       - name: 缓存 SDK / NDK（首次构建后能省很多时间）
@@ -84,6 +95,17 @@ jobs:
             .buildozer/*.log
             .buildozer/android/platform/build-*/*.log
           if-no-files-found: ignore
+
+      # Actions 日志没法从仓库外面读，失败时把现场输出推到一个临时分支上自查
+      - name: 导出诊断（失败时）
+        if: failure()
+        run: |
+          git checkout -B ci-diag
+          cp /tmp/diag/bz.txt diag-bz.txt 2>/dev/null || true
+          git add -f diag-bz.txt
+          git -c user.name="ci-bot" -c user.email="ci-bot@users.noreply.github.com" \
+            commit -m "CI 诊断输出（临时分支，可删）" || echo "没有可提交的诊断内容"
+          git push -f origin ci-diag
 
       - name: 上传 APK（构建产物）
         uses: actions/upload-artifact@v4
