@@ -26,7 +26,9 @@ android.permissions = READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,READ_MEDIA_IM
 # 版本
 version.regex = __version__ = ['"](.*)['"]
 version.filename = %(source.dir)s/main.py
-version = 0.1
+# 别再写 version = x.y：它和 version.regex 二选一，同时写新版 buildozer 会直接报
+# "Conflict between version and version.regex" 然后拒绝执行任何命令（包括 --version）。
+# 版本号统一由 main.py 里的 __version__ 决定。
 
 # 图标 / 启动图（放了同名文件就会自动用上）
 # icon.filename = %(source.dir)s/icon.png

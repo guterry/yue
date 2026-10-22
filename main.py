@@ -5,7 +5,7 @@
 打包 APK：  推到 GitHub 后跑 Actions 里的「打包安卓 APK」
 """
 
-__version__ = "0.1"
+__version__ = "0.1.2"
 
 import os
 import sys
